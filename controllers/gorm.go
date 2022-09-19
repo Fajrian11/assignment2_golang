@@ -1,8 +1,6 @@
 package controllers
 
-import (
-	"assignment2_golang/repositories"
-)
+import "assignment2_golang/repositories"
 
 type InDB struct {
 	OrderRepo repositories.OrderRepo

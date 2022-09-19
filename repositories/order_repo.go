@@ -17,7 +17,15 @@ func NewOrderRepo(db *gorm.DB) OrderRepo {
 	return OrderRepo{db: db}
 }
 
-func (or *OrderRepo) GetOrder() ([]model.Orders, error) {
+type OrderRepoApi interface {
+	GetOrder(c *gin.Context) ([]model.Orders, error)
+	GetOrderById(c *gin.Context) ([]model.Orders, error)
+	CreateOrder(c *gin.Context) ([]model.Orders, error)
+	UpdateOrder(c *gin.Context) ([]model.Orders, error)
+	DeleteOrder(c *gin.Context) ([]model.Orders, error)
+}
+
+func (or *OrderRepo) GetOrder(c *gin.Context) ([]model.Orders, error) {
 	var order = []model.Orders{}
 
 	err := or.db.Model(&model.Orders{}).Preload("Items").Find(&order).Error
@@ -143,7 +151,13 @@ func (or *OrderRepo) DeleteOrder(c *gin.Context) ([]model.Orders, error) {
 	// 	}
 	// }
 
-	err = or.db.Unscoped().Delete(&getOrder).Error // permanent delete with unscoped
+	// err = or.db.Unscoped().Delete(&getOrder).Error // permanent delete with unscoped
+	err = or.db.Exec(`
+	DELETE orders,items 
+	FROM orders 
+	INNER JOIN items 
+	WHERE orders.id = items.order_id 
+	AND items.order_id = ?`, id).Error
 	if err != nil {
 		fmt.Println("Data Gagal Dihapus!")
 		return nil, err

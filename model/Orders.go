@@ -1,14 +1,12 @@
 package model
 
-import (
-	"github.com/jinzhu/gorm"
-)
+import "gorm.io/gorm"
 
 type Orders struct {
 	gorm.Model
 	Customer_Name string  `json:"customer_name"`
 	Ordered_At    string  `json:"ordered_at"`
-	Items         []Items `json:"items" gorm:"foreignKey:Order_Id; polymorphic:Items; polymorphicValue:master constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Items         []Items `json:"items" gorm:"foreignKey:Order_Id"`
 	// Person        []Person
 }
 

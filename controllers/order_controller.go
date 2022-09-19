@@ -1,123 +1,44 @@
 package controllers
 
 import (
-	"assignment2_golang/model"
+	"assignment2_golang/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+type OrderController struct { // implementasi Controller
+	ors service.OrderServiceApi
+}
+
+func NewOrderController(ors service.OrderServiceApi) *OrderController {
+	return &OrderController{ors: ors}
+}
+
 // GORM
-
-func (idb *InDB) CreateOrders(c *gin.Context) {
-	var (
-		order  []model.Orders
-		result gin.H
-	)
-
-	order, err := idb.OrderRepo.CreateOrder(c)
-	if err != nil {
-		result = gin.H{
-			"result": order,
-		}
-	} else {
-		result = gin.H{
-			"result": "created successfully",
-		}
-	}
-	c.JSON(http.StatusOK, result)
+func (oc *OrderController) GetOrdersControllers(c *gin.Context) {
+	res := oc.ors.GetOrderService(c)
+	c.JSON(http.StatusOK, res)
 }
 
-func (idb *InDB) GetOrderById(c *gin.Context) {
-	var (
-		order  []model.Orders
-		result gin.H
-	)
-	order, err := idb.OrderRepo.GetOrderById(c)
-	if err != nil {
-		result = gin.H{
-			"result": err.Error(),
-			"count":  0,
-		}
-	} else {
-		result = gin.H{
-			"result": order,
-			"count":  0,
-		}
-	}
-	c.JSON(http.StatusOK, result)
+func (oc *OrderController) GetOrderByIdControllers(c *gin.Context) {
+	res := oc.ors.GetOrderByIdService(c)
+	c.JSON(http.StatusOK, res)
 }
 
-func (idb *InDB) GetOrders(c *gin.Context) {
-	var (
-		orders []model.Orders
-		result gin.H
-	)
-	orders, err := idb.OrderRepo.GetOrder()
-	if len(orders) <= 0 {
-		result = gin.H{
-			"result": nil,
-			"count":  0,
-			"error":  err,
-		}
-	} else {
-		result = gin.H{
-			"result": orders,
-			"count":  len(orders),
-		}
-	}
-	c.JSON(http.StatusOK, result)
+func (oc *OrderController) CreateOrderCOntrollers(c *gin.Context) {
+	res := oc.ors.CreateOrderService(c)
+	c.JSON(http.StatusOK, res)
 }
 
-func (idb *InDB) UpdateOrder(c *gin.Context) {
-	var (
-		orders []model.Orders
-		result gin.H
-	)
-	orders, err := idb.OrderRepo.UpdateOrder(c)
-
-	if err != nil {
-		result = gin.H{
-			"result": "Update Failed",
-			"count":  orders,
-		}
-	} else {
-		result = gin.H{
-			"result": "Update Successfully",
-		}
-	}
-	c.JSON(http.StatusOK, result)
+func (oc *OrderController) UpdateOrderControllers(c *gin.Context) {
+	res := oc.ors.UpdateOrderService(c)
+	c.JSON(http.StatusOK, res)
 }
 
-func (idb *InDB) DeleteOrder(c *gin.Context) {
-	var (
-		orders []model.Orders
-		// item   model.Items
-		result gin.H
-	)
-	orders, err := idb.OrderRepo.DeleteOrder(c)
-	// err2 = idb.DB.Unscoped().Delete(&item).Error // permanent delete with unscoped
-	if err != nil {
-		result = gin.H{
-			"result": "Gagal Menghapus Data",
-			"count":  orders,
-		}
-	} else {
-		result = gin.H{
-			"result": "Berhasil Menghapus Data",
-		}
-	}
-
-	// if err2 != nil {
-	// 	result = gin.H{
-	// 		"result": "Gagal Menghapus Data",
-	// 	}
-	// } else {
-	// 	result = gin.H{
-	// 		"result": "Berhasil Menghapus Data",
-	// 	}
-	// }
-	c.JSON(http.StatusOK, result)
+func (oc *OrderController) DeleteOrderControllers(c *gin.Context) {
+	res := oc.ors.DeleteOrderService(c)
+	c.JSON(http.StatusOK, res)
 }
 
 // func (p *PersonAPI) GetPerson(c *gin.Context) {
