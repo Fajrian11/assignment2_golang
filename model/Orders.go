@@ -1,13 +1,15 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Orders struct {
 	gorm.Model
 	Customer_Name string  `json:"customer_name"`
 	Ordered_At    string  `json:"ordered_at"`
 	Items         []Items `json:"items" gorm:"foreignKey:Order_Id"`
-	// Person        []Person
+	Person        Result  `json:"person"`
 }
 
 type Items struct {
@@ -18,12 +20,15 @@ type Items struct {
 	Order_Id    int    `json:"order_id"`
 }
 
+type Result struct {
+	Person []Person `json:"result"`
+}
+
 type Person struct {
-	// gorm.Model
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
-	Username  int    `json:"username"`
-	Phone     int    `json:"phone"`
-	Email     int    `json:"email"`
-	Uuid      int    `json:"uuid"`
+	Username  string `json:"username"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+	Uuid      string `json:"uuid"`
 }

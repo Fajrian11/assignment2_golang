@@ -16,11 +16,15 @@ func NewOrderService(rr repositories.OrderRepoApi) *serviceImpl { //provie servi
 }
 
 type OrderServiceApi interface {
+	// ORDER
 	GetOrderService(c *gin.Context) gin.H
 	GetOrderByIdService(c *gin.Context) gin.H
 	CreateOrderService(c *gin.Context) gin.H
 	UpdateOrderService(c *gin.Context) gin.H
 	DeleteOrderService(c *gin.Context) gin.H
+	// USER
+	UserRegisterService(c *gin.Context) gin.H
+	UserLoginService(c *gin.Context) gin.H
 }
 
 func (s serviceImpl) GetOrderService(c *gin.Context) gin.H {
@@ -131,5 +135,52 @@ func (s serviceImpl) DeleteOrderService(c *gin.Context) gin.H {
 	// 		"result": "Berhasil Menghapus Data",
 	// 	}
 	// }
+	return result
+}
+
+func (s serviceImpl) UserRegisterService(c *gin.Context) gin.H {
+	var (
+		result gin.H
+	)
+
+	_, err := s.rr.UserRegister(c)
+	if err != nil {
+		result = gin.H{
+			"result": "Failed Create User",
+		}
+	} else {
+		result = gin.H{
+			"result": "Created Successfully",
+		}
+	}
+	return result
+}
+
+func (s serviceImpl) UserLoginService(c *gin.Context) gin.H {
+	var result gin.H
+
+	err, comparePass, token := s.rr.UserLogin(c)
+
+	// Validate Email
+	if err != nil {
+		result = gin.H{
+			"error":   "Unauthorized",
+			"message": "invalid email / password",
+		}
+	}
+	// Validate Password
+	if !comparePass {
+		result = gin.H{
+			"error":   "Unauthorized",
+			"message": "invalid email / password",
+		}
+	}
+	// Validate Email & Password Jika Berhasil
+	if err == nil && comparePass {
+		result = gin.H{
+			"token": token,
+		}
+	}
+
 	return result
 }

@@ -1,9 +1,14 @@
 package repositories
 
 import (
+	"assignment2_golang/helpers"
 	"assignment2_golang/model"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -14,16 +19,27 @@ type OrderRepo struct {
 }
 
 func NewOrderRepo(db *gorm.DB) OrderRepo {
-	return OrderRepo{db: db}
+	return OrderRepo{
+		db: db,
+	}
 }
 
 type OrderRepoApi interface {
+	// ORDER
 	GetOrder(c *gin.Context) ([]model.Orders, error)
 	GetOrderById(c *gin.Context) ([]model.Orders, error)
 	CreateOrder(c *gin.Context) ([]model.Orders, error)
 	UpdateOrder(c *gin.Context) ([]model.Orders, error)
 	DeleteOrder(c *gin.Context) ([]model.Orders, error)
+	// USER
+	UserRegister(c *gin.Context) (model.User, error)
+	UserLogin(c *gin.Context) (error, bool, string)
 }
+
+type ConsumingAPIRepo interface {
+}
+
+// ORDER
 
 func (or *OrderRepo) GetOrder(c *gin.Context) ([]model.Orders, error) {
 	var order = []model.Orders{}
@@ -164,4 +180,92 @@ func (or *OrderRepo) DeleteOrder(c *gin.Context) ([]model.Orders, error) {
 	}
 	// err2 = idb.DB.Unscoped().Delete(&item).Error // permanent delete with unscoped
 	return order, nil
+}
+
+var baseURL = "https://hiyaa.site"
+
+// func (or *OrderRepo) DeleteOrder(c *gin.Context) ([]model.Orders, error) {
+
+func ConsumingAPI(c *gin.Context) {
+	response, err := http.Get(baseURL + "/data.php?qty=1&apikey=7f8fc96e-de1f-4aab-9c62-3dd1de365e66")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	// menampilkan response dari request
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var responseObject model.Result
+	json.Unmarshal(responseData, &responseObject)
+	fmt.Println(len(responseObject.Person))
+
+	// for i := 0; i < len(responseObject.Person); i++ {
+	// 	fmt.Println("First Name :", responseObject.Person[i].Firstname)
+	// 	fmt.Println("Last Name :", responseObject.Person[i].Lastname)
+	// 	fmt.Println("Usernmae :", responseObject.Person[i].Username)
+	// 	fmt.Println("Email :", responseObject.Person[i].Email)
+	// 	fmt.Println("Phone :", responseObject.Person[i].Phone)
+	// 	fmt.Println("UUID :", responseObject.Person[i].Uuid)
+	// }
+	fmt.Println(responseObject.Person)
+}
+
+var (
+	appJSON = "application/json"
+)
+
+func (or *OrderRepo) UserRegister(c *gin.Context) (model.User, error) {
+	ContentType := helpers.GetContentType(c)
+
+	var user = model.User{}
+	var GetUser model.User
+
+	JsonUser := GetUser
+	if ContentType == appJSON {
+		c.ShouldBindJSON(&JsonUser)
+	} else {
+		c.ShouldBind(&JsonUser)
+	}
+
+	// menggunakan JSON
+	// err := c.BindJSON(&JsonUser)
+	// if err != nil {
+	// 	c.AbortWithError(http.StatusBadRequest, err)
+	// 	return nil, err
+	// }
+	err := or.db.Create(&JsonUser).Error
+	fmt.Println(JsonUser)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return user, nil
+}
+
+func (or *OrderRepo) UserLogin(c *gin.Context) (error, bool, string) {
+	contentType := helpers.GetContentType(c)
+	_ = contentType
+	User := model.User{}
+	password := ""
+
+	if contentType == appJSON {
+		c.ShouldBindJSON(&User)
+	} else {
+		c.ShouldBind(&User)
+	}
+
+	password = User.Password
+
+	// Validate Email
+	err := or.db.Debug().Where("email = ?", User.Email).Take(&User).Error
+	// Validate Password
+	comparePass := helpers.ComparePass([]byte(User.Password), []byte(password))
+	// Validate Email & Password Jika Berhasil
+	token := helpers.GenerateToken(User.ID, User.Email)
+
+	return err, comparePass, token
 }

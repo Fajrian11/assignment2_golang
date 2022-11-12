@@ -15,7 +15,6 @@ func NewOrderController(ors service.OrderServiceApi) *OrderController {
 	return &OrderController{ors: ors}
 }
 
-// GORM
 func (oc *OrderController) GetOrdersControllers(c *gin.Context) {
 	res := oc.ors.GetOrderService(c)
 	c.JSON(http.StatusOK, res)
@@ -38,6 +37,15 @@ func (oc *OrderController) UpdateOrderControllers(c *gin.Context) {
 
 func (oc *OrderController) DeleteOrderControllers(c *gin.Context) {
 	res := oc.ors.DeleteOrderService(c)
+	c.JSON(http.StatusOK, res)
+}
+
+func (oc *OrderController) UserRegisterControllers(c *gin.Context) {
+	res := oc.ors.UserRegisterService(c)
+	c.JSON(http.StatusOK, res)
+}
+func (oc *OrderController) UserLoginControllers(c *gin.Context) {
+	res := oc.ors.UserLoginService(c)
 	c.JSON(http.StatusOK, res)
 }
 

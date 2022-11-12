@@ -1,0 +1,25 @@
+basePath: /
+host: localhost:3000
+info:
+  contact:
+    email: soberkoder@swagger.io
+    name: API Support
+  description: This is a sample serice for managing orders
+  license:
+    name: Apache 2.0
+  termsOfService: http://swagger.io/terms/
+  title: Orders API
+  version: "1.0"
+paths:
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all orders
+      produces:
+      - application/json
+      responses: {}
+      summary: Get details of all orders
+      tags:
+      - orders
+swagger: "2.0"
